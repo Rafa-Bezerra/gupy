@@ -79,7 +79,7 @@ export function badgeClass(status: BadgeStatus): string {
 }
 
 export function prioridadeColor(prioridade:string): string {
-    var cor = "";
+    let cor = "";
     switch (prioridade) {
         case "urgente":
             cor = "bg-red-600";
@@ -98,7 +98,7 @@ export function prioridadeColor(prioridade:string): string {
 }
 
 export function prioridadeDesc(prioridade:string): string {
-    var cor = "";
+    let cor = "";
     switch (prioridade) {
         case "urgente":
             cor = "Urgente";
@@ -114,30 +114,4 @@ export function prioridadeDesc(prioridade:string): string {
             break;
     }
     return cor;
-}
-export async function generateAndDownload(
-    endpoint: string,
-    payload: any,
-    prefix: string
-  ) {
-    console.log(endpoint);
-    
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err?.error ?? `Erro ao gerar ${prefix}`)
-    }
-
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${prefix}_${Date.now()}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
 }

@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef, Row } from '@tanstack/react-table'
 import { SearchIcon, SquarePlus, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input'
@@ -55,7 +55,7 @@ export default function Page() {
     const [deleteId, setDeleteId] = useState<number | null>(null)
     const debounceRef = useRef<NodeJS.Timeout | null>(null)
     const loading = isPending
-    
+
     const legendaCampos: Record<string, string> = {
         todos: "Todos",
         lideranca: "Liderança",
@@ -79,6 +79,30 @@ export default function Page() {
         administrativo: "Administrativo",
         engenhariaobras: "Engenharia/Obras",
     };
+
+    const camposCheckbox: (keyof Grupo)[] = [
+        "todos",
+        "lideranca",
+        "gestaopessoas",
+        "contabilfinanceiro",
+        "ti",
+        "manutencao",
+        "ssmaas",
+        "juridico",
+        "comunicacao",
+        "ouvidoria",
+        "cca",
+        "cco",
+        "aph",
+        "arrecadacao",
+        "trafego",
+        "sinalizacaocondominio",
+        "gestaolideranca",
+        "laboratoriousina",
+        "topografia",
+        "administrativo",
+        "engenhariaobras",
+    ];
 
     const form = useForm<Grupo>({
         defaultValues: {
@@ -175,7 +199,7 @@ export default function Page() {
         try {
             await deleteElement(deleteId)
         } catch (err) {
-            toast.error(`Erro ao excluir registro`)
+            toast.error((err as Error).message)
         } finally {
             toast.success(`Registro excluído`)
             setDeleteId(null)
@@ -260,7 +284,7 @@ export default function Page() {
                 await createElement(data)
             }
         } catch (err) {
-            toast.error(`Erro ao enviar registro`)
+            toast.error((err as Error).message)
         } finally {
             toast.success(`Registro enviado`)
             form.reset()
@@ -269,71 +293,46 @@ export default function Page() {
         }
     }
 
-    const colunas = useMemo<ColumnDef<Grupo>[]>(
-        () => [
-            { accessorKey: 'id', header: 'ID' },
-            { accessorKey: 'idcargo', header: 'CARGO' },
-            ...[
-                'todos',
-                'lideranca',
-                'gestaopessoas',
-                'contabilfinanceiro',
-                'ti',
-                'manutencao',
-                'ssmaas',
-                'juridico',
-                'comunicacao',
-                'ouvidoria',
-                'cca',
-                'cco',
-                'aph',
-                'arrecadacao',
-                'trafego',
-                'sinalizacaocondominio',
-                'gestaolideranca',
-                'laboratoriousina',
-                'topografia',
-                'administrativo',
-                'engenhariaobras',
-            ].map((campo) => ({
-                accessorKey: campo,
-                header: legendaCampos[campo].toUpperCase() || campo.toUpperCase(),
-                cell: ({ row }: any) => (
-                    <div className="flex justify-center items-center">
-                        <input
-                            type="checkbox"
-                            checked={row.original[campo] === 1}
-                            readOnly
-                            className="cursor-default"
-                        />
-                    </div>
-                ),
-            })),
-            {
-                id: 'actions',
-                header: 'AÇÕES',
-                cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUpdate(row.original.id!)}
-                        >
-                            Editar
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => setDeleteId(row.original.id!)}
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
-                    </div>
-                )
-            }
-        ],
-        []
-    )
+    const colunas = useMemo<ColumnDef<Grupo>[]>(() => [
+        { accessorKey: 'id', header: 'ID' },
+        { accessorKey: 'idcargo', header: 'CARGO' },
+        ...camposCheckbox.map((campo) => ({
+            accessorKey: campo,
+            header: legendaCampos[campo].toUpperCase() || campo.toUpperCase(),
+            cell: ({ row }: { row: Row<Grupo> }) => (
+                <div className="flex justify-center items-center">
+                    <input
+                        type="checkbox"
+                        checked={row.original[campo] === 1}
+                        readOnly
+                        className="cursor-default"
+                    />
+                </div>
+            ),
+        })),
+        {
+            id: 'actions',
+            header: 'AÇÕES',
+            cell: ({ row }: { row: Row<Grupo> }) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUpdate(row.original.id!)}
+                    >
+                        Editar
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setDeleteId(row.original.id!)}
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </Button>
+                </div>
+            )
+        }
+    ], []);
 
     return (
         <div className="pt-6 pr-6">
@@ -445,7 +444,7 @@ export default function Page() {
                                                     onChange={(e) => field.onChange(e.target.checked ? 1 : 0)}
                                                 />
                                             </FormControl>
-                                            <FormLabel>{legendaCampos[name].toLocaleUpperCase() ||name.toLocaleUpperCase()}</FormLabel>
+                                            <FormLabel>{legendaCampos[name].toLocaleUpperCase() || name.toLocaleUpperCase()}</FormLabel>
                                         </FormItem>
                                     )}
                                 />
