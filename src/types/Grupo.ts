@@ -1,0 +1,32 @@
+export type Grupo = {
+    id?: number
+    grupo?: string
+    grade?: string
+    idcargo: string
+    todos: number
+    lideranca: number
+    gestaopessoas: number
+    contabilfinanceiro: number
+    ti: number
+    manutencao: number
+    ssmaas: number
+    juridico: number
+    comunicacao: number
+    ouvidoria: number
+    cca: number
+    cco: number
+    aph: number
+    arrecadacao: number
+    trafego: number
+    sinalizacaocondominio: number
+    gestaolideranca: number
+    laboratoriousina: number
+    topografia: number
+    administrativo: number
+    engenhariaobras: number
+    idgupy?: number
+    reccreatedby?: string
+    reccreatedon?: string
+    recmodifiedby?: string
+    recmodifiedon?: string
+}
