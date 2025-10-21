@@ -19,7 +19,7 @@ export type Grupo = {
     arrecadacao: number
     trafego: number
     sinalizacaocondominio: number
-    gestaolideranca: number
+    gestaoliderranca: number
     laboratoriousina: number
     topografia: number
     administrativo: number
