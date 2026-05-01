@@ -3,6 +3,7 @@ export type Grupo = {
     grupo?: string
     grade?: string
     idcargo: string
+    liderancaimediata?: string
     todos: number
     lideranca: number
     gestaopessoas: number

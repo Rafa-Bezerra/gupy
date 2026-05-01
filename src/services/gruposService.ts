@@ -50,4 +50,15 @@ export async function deleteElement(id: number): Promise<void> {
     }
 }
 
+export async function getFuncionariosAtivos(): Promise<{ id_person_performance: number | null; name: string }[]> {
+    const res = await fetch(`${API_BASE}/api/${caminho}/funcionarios-ativos`, {
+        headers: headers(),
+    });
+    if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(`Erro ${res.status} ao buscar funcionários: ${msg}`);
+    }
+    return res.json();
+}
+
 export type { Grupo }

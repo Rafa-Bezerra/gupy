@@ -10,7 +10,7 @@ import React, {
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { ColumnDef, Row } from '@tanstack/react-table'
-import { SearchIcon, SquarePlus, Trash2, X } from 'lucide-react'
+import { Check, ChevronsUpDown, SearchIcon, SquarePlus, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,20 @@ import {
     FormLabel,
     FormMessage
 } from '@/components/ui/form'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command'
+import { cn } from '@/lib/utils'
 import { stripDiacritics } from '@/utils/functions'
 import {
     Grupo,
@@ -37,7 +51,8 @@ import {
     getElementById,
     createElement,
     updateElement,
-    deleteElement
+    deleteElement,
+    getFuncionariosAtivos,
 } from '@/services/gruposService'
 
 export default function Page() {
@@ -53,6 +68,7 @@ export default function Page() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [updateMode, setUpdateMode] = useState(false)
     const [deleteId, setDeleteId] = useState<number | null>(null)
+    const [funcionariosAtivos, setFuncionariosAtivos] = useState<{ id_person_performance: number | null; name: string }[]>([])
     const debounceRef = useRef<NodeJS.Timeout | null>(null)
     const loading = isPending
 
@@ -108,6 +124,7 @@ export default function Page() {
         defaultValues: {
             id: 0,
             idcargo: '',
+            liderancaimediata: '',
             todos: 0,
             lideranca: 0,
             gestaopessoas: 0,
@@ -143,6 +160,7 @@ export default function Page() {
 
     useEffect(() => {
         handleSearch(searchParams.get('q') ?? '')
+        getFuncionariosAtivos().then(setFuncionariosAtivos).catch(() => {})
     }, [])
 
     useEffect(() => {
@@ -216,6 +234,7 @@ export default function Page() {
             form.reset({
                 id: response.id ?? 0,
                 idcargo: response.idcargo ?? '',
+                liderancaimediata: response.liderancaimediata ?? '',
                 todos: response.todos ?? 0,
                 lideranca: response.lideranca ?? 0,
                 gestaopessoas: response.gestaopessoas ?? 0,
@@ -249,6 +268,7 @@ export default function Page() {
         form.reset({
             id: 0,
             idcargo: '',
+            liderancaimediata: '',
             todos: 0,
             lideranca: 0,
             gestaopessoas: 0,
@@ -296,6 +316,15 @@ export default function Page() {
     const colunas = useMemo<ColumnDef<Grupo>[]>(() => [
         { accessorKey: 'id', header: 'ID' },
         { accessorKey: 'idcargo', header: 'CARGO' },
+        {
+            accessorKey: 'liderancaimediata',
+            header: 'LIDERANÇA IMEDIATA',
+            cell: ({ row }: { row: Row<Grupo> }) => {
+                const idPerf = row.original.liderancaimediata
+                const func = funcionariosAtivos.find(f => String(f.id_person_performance) === idPerf)
+                return <span>{func ? func.name : (idPerf || '—')}</span>
+            }
+        },
         ...camposCheckbox.map((campo) => ({
             accessorKey: campo,
             header: legendaCampos[campo].toUpperCase() || campo.toUpperCase(),
@@ -403,6 +432,60 @@ export default function Page() {
                                         <FormControl>
                                             <Input {...field} />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="liderancaimediata"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>LIDERANÇA IMEDIATA</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        className={cn('w-full justify-between font-normal', !field.value && 'text-muted-foreground')}
+                                                    >
+                                                        {field.value
+                                                            ? funcionariosAtivos.find(f => String(f.id_person_performance) === field.value)?.name ?? field.value
+                                                            : 'Selecione...'}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0" align="start">
+                                                <Command>
+                                                    <CommandInput placeholder="Buscar funcionário..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>Nenhum funcionário encontrado.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            <CommandItem
+                                                                value=""
+                                                                onSelect={() => field.onChange('')}
+                                                            >
+                                                                <Check className={cn('mr-2 h-4 w-4', !field.value ? 'opacity-100' : 'opacity-0')} />
+                                                                Nenhum
+                                                            </CommandItem>
+                                                            {funcionariosAtivos.map(f => (
+                                                                <CommandItem
+                                                                    key={f.id_person_performance}
+                                                                    value={f.name}
+                                                                    onSelect={() => field.onChange(String(f.id_person_performance))}
+                                                                >
+                                                                    <Check className={cn('mr-2 h-4 w-4', String(f.id_person_performance) === field.value ? 'opacity-100' : 'opacity-0')} />
+                                                                    {f.name}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                         <FormMessage />
                                     </FormItem>
                                 )}
