@@ -15,7 +15,8 @@ import { NavSection } from '@/lib/data'
 
 import {
   Home,
-  ListChecks
+  ListChecks,
+  Users
 } from 'lucide-react'
 import { JSX } from 'react/jsx-runtime'
 
@@ -30,6 +31,7 @@ export default function AppSidebar({ navMain }: AppSidebarProps) {
   const iconMap: Record<string, JSX.Element> = {
     Início: <Home className="w-5 h-5" />,
     Grupos: <ListChecks className="w-5 h-5" />,
+    Líderes: <Users className="w-5 h-5" />,
   }
 
   return (
